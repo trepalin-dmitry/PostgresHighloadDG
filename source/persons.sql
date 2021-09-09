@@ -1,4 +1,4 @@
-create table persons
+create table if not exists persons
 (
 	id serial
 		constraint persons_pkey

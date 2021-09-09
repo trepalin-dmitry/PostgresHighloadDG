@@ -1,7 +1,7 @@
-create table "exchangeDeals"
+create table if not exists "exchangeDealsSequenceOne"
 (
-	id bigserial
-		constraint "exchangeDeals_pkey"
+	id bigint not null
+		constraint "exchangeDealsSequenceOne_pkey"
 			primary key,
 	"accountGUId" uuid not null,
 	"couponCurrencyGUId" uuid not null,
@@ -10,7 +10,7 @@ create table "exchangeDeals"
 	"dealDateTime" timestamp not null,
 	"directionCode" varchar(255) not null,
 	guid uuid not null
-		constraint uk_cubgs0x11g60agsg5yqq4ybdg
+		constraint uk_rgmwmx01w9dcqpx5xql6vulcd
 			unique,
 	"instrumentGUId" uuid not null,
 	"orderGUId" uuid not null,
@@ -24,5 +24,5 @@ create table "exchangeDeals"
 	volume numeric(19,2) not null
 );
 
-alter table "exchangeDeals" owner to postgres;
+alter table "exchangeDealsSequenceOne" owner to postgres;
 

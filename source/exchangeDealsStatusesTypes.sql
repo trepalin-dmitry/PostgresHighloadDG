@@ -1,4 +1,4 @@
-create table "exchangeDealsStatusesTypes"
+create table if not exists "exchangeDealsStatusesTypes"
 (
 	id char not null
 		constraint "exchangeDealsStatusesTypes_pkey"

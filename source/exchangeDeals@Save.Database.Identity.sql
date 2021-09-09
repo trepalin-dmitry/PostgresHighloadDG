@@ -1,4 +1,4 @@
-create procedure "exchangeDeals@Save.Ids"(data character varying)
+create or replace procedure "exchangeDeals@Save.Database.Identity"(data character varying, size integer)
 	language plpgsql
 as $$
 DECLARE
@@ -7,7 +7,7 @@ begin
 
     -- Создание/Изменение "exchangeDeals"
     with changed(id, guid) as (
-        INSERT INTO "exchangeDeals" (guid, "accountGUId", "couponCurrencyGUId", "couponVolume", "currencyGUId",
+        INSERT INTO "exchangeDealsIdentity" (guid, "accountGUId", "couponCurrencyGUId", "couponVolume", "currencyGUId",
                                      "dealDateTime",
                                      "directionCode", "instrumentGUId", "orderGUId", "placeCode", "planDeliveryDate",
                                      "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode", volume)
@@ -56,27 +56,28 @@ begin
 
     -- Создание/Изменение/Удаление "exchangeDealsPersons"
     WITH changed("exchangeDealId", "personId") as (
-        INSERT INTO "exchangeDealsPersons" (comment, "exchangeDealId", "personId")
+        INSERT INTO "exchangeDealsPersonsIdentity" (comment, "exchangeDealId", "personId")
             SELECT P.comment,
                    DK.id,
-                   P."personId"
+                   PPP.id
             FROM JSONB_TO_RECORDSET(data :: JSONB) AS D (guid UUID, "persons" JSONB)
-                     LEFT JOIN "exchangeDeals" AS DK ON DK.guid = D.guid
+                     LEFT JOIN "exchangeDealsIdentity" AS DK ON DK.guid = D.guid
                      CROSS JOIN LATERAL
                 (
                 SELECT P.*
                 FROM JSONB_TO_RECORDSET(D."persons" :: JSONB) AS P
                          (
-                          "personId" integer,
+                          "personGUId" uuid,
                           comment CHARACTER VARYING(255)
                              )
                 ) P
+                     LEFT JOIN "persons" AS PPP ON PPP.guid = P."personGUId"
             ON CONFLICT ("exchangeDealId", "personId") DO UPDATE
                 SET comment = EXCLUDED.comment
             RETURNING "exchangeDealId", "personId"
     )
     delete
-    from "exchangeDealsPersons" P2
+    from "exchangeDealsPersonsIdentity" P2
     where P2."exchangeDealId" = any (dealsIds)
       and not exists(select *
                      from changed C
@@ -85,17 +86,17 @@ begin
 
     -- Создание/Изменение/Удаление "exchangeDealsStatuses"
     with changed("exchangeDealId", "index") as (
-        INSERT INTO "exchangeDealsStatuses" (index, comment, "dateTime", "exchangeDealId", "typeId")
+        INSERT INTO "exchangeDealsStatusesIdentity" (index, comment, "dateTime", "exchangeDealId", "typeId")
             SELECT P.index,
                    P.comment,
                    P."dateTime",
                    DK.id,
-                   P."typeId"
+                   PPP.id
             FROM JSONB_TO_RECORDSET(data :: JSONB) AS D (
                                                          guid UUID,
                                                          "statuses" JSONB
                 )
-                     LEFT JOIN "exchangeDeals" AS DK ON DK.guid = D.guid
+                     LEFT JOIN "exchangeDealsIdentity" AS DK ON DK.guid = D.guid
                      CROSS JOIN LATERAL
                 (
                 SELECT P.*
@@ -104,15 +105,16 @@ begin
                           "index" integer,
                           "comment" varchar(255),
                           "dateTime" timestamp,
-                          "typeId" char
+                          "typeCode" varchar(255)
                              )
                 ) P
+                     LEFT JOIN "exchangeDealsStatusesTypes" AS PPP ON PPP.code = P."typeCode"
             ON CONFLICT ("exchangeDealId", "index") DO UPDATE
                 SET comment = EXCLUDED.comment
             RETURNING "exchangeDealId", "index"
     )
     delete
-    from "exchangeDealsStatuses" P2
+    from "exchangeDealsStatusesIdentity" P2
     where P2."exchangeDealId" = any (dealsIds)
       and not exists(select *
                      from changed C
@@ -121,5 +123,5 @@ begin
 end ;
 $$;
 
-alter procedure "exchangeDeals@Save.Ids"(varchar) owner to postgres;
+alter procedure "exchangeDeals@Save.Database.Identity"(varchar, integer) owner to postgres;
 
