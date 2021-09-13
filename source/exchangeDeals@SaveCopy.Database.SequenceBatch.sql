@@ -1,4 +1,4 @@
-create or replace procedure "exchangeDeals@SaveCopy.Database.SequenceBatch"(uploadkey uuid, size integer)
+create or replace procedure "exchangeDeals@SaveCopy.Database.SequenceBatch"(size integer)
 	language plpgsql
 as $$
 DECLARE
@@ -36,7 +36,6 @@ begin
                      SELECT row_number() over (ORDER BY (SELECT NULL)) as "rowNumber",
                             D.*
                      FROM "exchangeDealsSource" D
-                     WHERE D."uploadKey" = uploadKey
                  ) D
                      LEFT JOIN (
                 SELECT NV."rowNumber",
@@ -74,7 +73,7 @@ begin
                    PPP.id
             FROM (SELECT *
                   FROM "exchangeDealsPersonsSource" D
-                  WHERE D."uploadKey" = uploadKey) AS D
+                 ) AS D
                      LEFT JOIN "exchangeDealsSequenceBatch" AS DK ON DK.guid = D."exchangeDealGuid"
                      LEFT JOIN "persons" AS PPP ON PPP.guid = D."personGuid"
             ON CONFLICT ("exchangeDealId", "personId") DO UPDATE
@@ -99,7 +98,7 @@ begin
                    PPP.id
             FROM (SELECT *
                   FROM "exchangeDealsStatusesSource" D
-                  WHERE D."uploadKey" = uploadKey) AS D
+                 ) AS D
                      LEFT JOIN "exchangeDealsSequenceBatch" AS DK ON DK.guid = D."exchangeDealGuid"
                      LEFT JOIN "exchangeDealsStatusesTypes" AS PPP ON PPP.code = D."typeCode"
             ON CONFLICT ("exchangeDealId", "index") DO UPDATE
@@ -116,5 +115,5 @@ begin
 end ;
 $$;
 
-alter procedure "exchangeDeals@SaveCopy.Database.SequenceBatch"(uuid, integer) owner to postgres;
+alter procedure "exchangeDeals@SaveCopy.Database.SequenceBatch"(integer) owner to postgres;
 

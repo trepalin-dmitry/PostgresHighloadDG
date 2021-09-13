@@ -1,4 +1,4 @@
-create or replace procedure "exchangeDeals@SaveCopy.Database.SequenceOne"(uploadkey uuid, size integer)
+create or replace procedure "exchangeDeals@SaveCopy.Database.SequenceOne"(size integer)
 	language plpgsql
 as $$
 DECLARE
@@ -7,13 +7,14 @@ begin
 
     -- Создание/Изменение "exchangeDeals"
     with changed(id, guid) as (
-        INSERT INTO "exchangeDealsSequenceOne" (id, guid, "accountGUId", "couponCurrencyGUId", "couponVolume", "currencyGUId",
-                                             "dealDateTime",
-                                             "directionCode", "instrumentGUId", "orderGUId", "placeCode",
-                                             "planDeliveryDate",
-                                             "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode", volume)
-            SELECT
-                   nextval('exchange_deals_sequence_one_id_seq'),
+        INSERT INTO "exchangeDealsSequenceOne" (id, guid, "accountGUId", "couponCurrencyGUId", "couponVolume",
+                                                "currencyGUId",
+                                                "dealDateTime",
+                                                "directionCode", "instrumentGUId", "orderGUId", "placeCode",
+                                                "planDeliveryDate",
+                                                "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode",
+                                                volume)
+            SELECT nextval('exchange_deals_sequence_one_id_seq'),
                    D.guid,
                    D."accountGUId",
                    D."couponCurrencyGUId",
@@ -31,11 +32,7 @@ begin
                    D."tradeSessionGUId",
                    D."typeCode",
                    D.volume
-            FROM (
-                     select D.*
-                     from "exchangeDealsSource" D
-                     WHERE D."uploadKey" = uploadKey
-                 ) D
+            FROM "exchangeDealsSource" D
             ON CONFLICT (guid) DO UPDATE
                 SET "accountGUId" = EXCLUDED."accountGUId",
                     "couponCurrencyGUId" = EXCLUDED."couponCurrencyGUId",
@@ -65,7 +62,7 @@ begin
             SELECT D.comment,
                    DK.id,
                    PPP.id
-            FROM (SELECT * FROM "exchangeDealsPersonsSource" D WHERE D."uploadKey" = uploadKey) D
+            FROM "exchangeDealsPersonsSource" D
                      LEFT JOIN "exchangeDealsSequenceOne" AS DK ON DK.guid = D."exchangeDealGuid"
                      LEFT JOIN "persons" AS PPP ON PPP.guid = D."personGuid"
             ON CONFLICT ("exchangeDealId", "personId") DO UPDATE
@@ -88,7 +85,7 @@ begin
                    D."dateTime",
                    DK.id,
                    PPP.id
-            FROM (SELECT * FROM "exchangeDealsStatusesSource" D WHERE D."uploadKey" = uploadKey) D
+            FROM "exchangeDealsStatusesSource" D
                      LEFT JOIN "exchangeDealsSequenceOne" AS DK ON DK.guid = D."exchangeDealGuid"
                      LEFT JOIN "exchangeDealsStatusesTypes" AS PPP ON PPP.code = D."typeCode"
             ON CONFLICT ("exchangeDealId", "index") DO UPDATE
@@ -105,5 +102,5 @@ begin
 end ;
 $$;
 
-alter procedure "exchangeDeals@SaveCopy.Database.SequenceOne"(uuid, integer) owner to postgres;
+alter procedure "exchangeDeals@SaveCopy.Database.SequenceOne"(integer) owner to postgres;
 

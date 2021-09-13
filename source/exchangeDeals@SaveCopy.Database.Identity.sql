@@ -1,4 +1,4 @@
-create or replace procedure "exchangeDeals@SaveCopy.Database.Identity"(uploadkey uuid, size integer)
+create or replace procedure "exchangeDeals@SaveCopy.Database.Identity"(size integer)
 	language plpgsql
 as $$
 DECLARE
@@ -32,7 +32,6 @@ begin
             FROM (
                      select D.*
                      from "exchangeDealsSource" D
-                     WHERE D."uploadKey" = uploadKey
                  ) D
             ON CONFLICT (guid) DO UPDATE
                 SET "accountGUId" = EXCLUDED."accountGUId",
@@ -63,7 +62,10 @@ begin
             SELECT D.comment,
                    DK.id,
                    PPP.id
-            FROM (SELECT * FROM "exchangeDealsPersonsSource" D WHERE D."uploadKey" = uploadKey) D
+            FROM (
+                     SELECT *
+                     FROM "exchangeDealsPersonsSource" D
+                 ) D
                      LEFT JOIN "exchangeDealsIdentity" AS DK ON DK.guid = D."exchangeDealGuid"
                      LEFT JOIN "persons" AS PPP ON PPP.guid = D."personGuid"
             ON CONFLICT ("exchangeDealId", "personId") DO UPDATE
@@ -86,7 +88,10 @@ begin
                    D."dateTime",
                    DK.id,
                    PPP.id
-            FROM (SELECT * FROM "exchangeDealsStatusesSource" D WHERE D."uploadKey" = uploadKey) D
+            FROM (
+                     SELECT *
+                     FROM "exchangeDealsStatusesSource" D
+                 ) D
                      LEFT JOIN "exchangeDealsIdentity" AS DK ON DK.guid = D."exchangeDealGuid"
                      LEFT JOIN "exchangeDealsStatusesTypes" AS PPP ON PPP.code = D."typeCode"
             ON CONFLICT ("exchangeDealId", "index") DO UPDATE
@@ -103,5 +108,5 @@ begin
 end ;
 $$;
 
-alter procedure "exchangeDeals@SaveCopy.Database.Identity"(uuid, integer) owner to postgres;
+alter procedure "exchangeDeals@SaveCopy.Database.Identity"(integer) owner to postgres;
 
