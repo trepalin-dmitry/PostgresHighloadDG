@@ -12,7 +12,7 @@ begin
                                                   "dealDateTime",
                                                   "directionCode", "instrumentGUId", "orderGUId", "placeCode",
                                                   "planDeliveryDate",
-                                                  "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode",
+                                                  "planPaymentDate", price, quantity, "tradeSessionGUId", "typeId",
                                                   volume)
             SELECT NV."nextVal",
                    D.guid,
@@ -30,7 +30,7 @@ begin
                    D.price,
                    D.quantity,
                    D."tradeSessionGUId",
-                   D."typeCode",
+                   D."typeId",
                    D.volume
             FROM (
                      SELECT row_number() over (ORDER BY (SELECT NULL)) as "rowNumber",
@@ -57,7 +57,7 @@ begin
                     price = EXCLUDED.price,
                     quantity = EXCLUDED.quantity,
                     "tradeSessionGUId" = EXCLUDED."tradeSessionGUId",
-                    "typeCode" = EXCLUDED."typeCode",
+                    "typeId" = EXCLUDED."typeId",
                     volume = EXCLUDED.volume
             RETURNING id
     )

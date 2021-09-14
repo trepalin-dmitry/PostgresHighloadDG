@@ -12,7 +12,7 @@ begin
                                                 "dealDateTime",
                                                 "directionCode", "instrumentGUId", "orderGUId", "placeCode",
                                                 "planDeliveryDate",
-                                                "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode",
+                                                "planPaymentDate", price, quantity, "tradeSessionGUId", "typeId",
                                                 volume)
             SELECT nextval('exchange_deals_sequence_one_id_seq'),
                    D.guid,
@@ -30,12 +30,9 @@ begin
                    D.price,
                    D.quantity,
                    D."tradeSessionGUId",
-                   D."typeCode",
+                   D."typeId",
                    D.volume
-            FROM (
-                     select D.*
-                     from "exchangeDealsInternal" D
-                 ) D
+            FROM "exchangeDealsInternal" D
             ON CONFLICT (guid) DO UPDATE
                 SET "accountGUId" = EXCLUDED."accountGUId",
                     "couponCurrencyGUId" = EXCLUDED."couponCurrencyGUId",
@@ -51,7 +48,7 @@ begin
                     price = EXCLUDED.price,
                     quantity = EXCLUDED.quantity,
                     "tradeSessionGUId" = EXCLUDED."tradeSessionGUId",
-                    "typeCode" = EXCLUDED."typeCode",
+                    "typeId" = EXCLUDED."typeId",
                     volume = EXCLUDED.volume
             RETURNING id, guid
     )

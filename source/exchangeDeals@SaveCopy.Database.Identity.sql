@@ -11,7 +11,7 @@ begin
                                              "dealDateTime",
                                              "directionCode", "instrumentGUId", "orderGUId", "placeCode",
                                              "planDeliveryDate",
-                                             "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode", volume)
+                                             "planPaymentDate", price, quantity, "tradeSessionGUId", "typeId", volume)
             SELECT D.guid,
                    D."accountGUId",
                    D."couponCurrencyGUId",
@@ -27,12 +27,10 @@ begin
                    D.price,
                    D.quantity,
                    D."tradeSessionGUId",
-                   D."typeCode",
+                   T.id,
                    D.volume
-            FROM (
-                     select D.*
-                     from "exchangeDealsSource" D
-                 ) D
+            FROM "exchangeDealsSource" D
+                     LEFT JOIN "exchangeDealsTypes" T ON T.code = D."typeCode"
             ON CONFLICT (guid) DO UPDATE
                 SET "accountGUId" = EXCLUDED."accountGUId",
                     "couponCurrencyGUId" = EXCLUDED."couponCurrencyGUId",
@@ -48,7 +46,7 @@ begin
                     price = EXCLUDED.price,
                     quantity = EXCLUDED.quantity,
                     "tradeSessionGUId" = EXCLUDED."tradeSessionGUId",
-                    "typeCode" = EXCLUDED."typeCode",
+                    "typeId" = EXCLUDED."typeId",
                     volume = EXCLUDED.volume
             RETURNING id, guid
     )

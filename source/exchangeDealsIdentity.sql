@@ -20,8 +20,10 @@ create table if not exists "exchangeDealsIdentity"
 	price numeric(19,2) not null,
 	quantity numeric(19,2) not null,
 	"tradeSessionGUId" uuid not null,
-	"typeCode" varchar(255) not null,
-	volume numeric(19,2) not null
+	volume numeric(19,2) not null,
+	"typeId" integer not null
+		constraint fksb9dayl4ihbvr5vvjed6698iw
+			references "exchangeDealsTypes"
 );
 
 alter table "exchangeDealsIdentity" owner to postgres;

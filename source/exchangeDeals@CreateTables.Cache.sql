@@ -22,7 +22,7 @@ begin
         price                numeric(19, 2) not null,
         quantity             numeric(19, 2) not null,
         "tradeSessionGUId"   uuid           not null,
-        "typeCode"           varchar(255)   not null,
+        "typeId"             integer        not null,
         volume               numeric(19, 2) not null
     );
 

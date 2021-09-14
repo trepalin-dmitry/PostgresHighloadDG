@@ -13,3 +13,5 @@
 SELECT (SELECT count(*) FROM "exchangeDealsIdentity"),
        (SELECT count(*) FROM "exchangeDealsSequenceOne"),
        (SELECT count(*) FROM "exchangeDealsSequenceBatch");
+
+SELECT * FROM "exchangeDealsTypes" T WHERE T.code = 'qxJeApM'

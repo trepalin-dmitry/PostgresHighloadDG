@@ -8,10 +8,27 @@ begin
     -- Создание/Изменение "exchangeDeals"
     with changed(id, guid) as (
         INSERT INTO "exchangeDealsIdentity" (guid, "accountGUId", "couponCurrencyGUId", "couponVolume", "currencyGUId",
-                                     "dealDateTime",
-                                     "directionCode", "instrumentGUId", "orderGUId", "placeCode", "planDeliveryDate",
-                                     "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode", volume)
-            SELECT D.*
+                                             "dealDateTime",
+                                             "directionCode", "instrumentGUId", "orderGUId", "placeCode",
+                                             "planDeliveryDate",
+                                             "planPaymentDate", price, quantity, "tradeSessionGUId", "typeId", volume)
+            SELECT D.guid,
+                   D."accountGUId",
+                   D."couponCurrencyGUId",
+                   D."couponVolume",
+                   D."currencyGUId",
+                   D."dealDateTime",
+                   D."directionCode",
+                   D."instrumentGUId",
+                   D."orderGUId",
+                   D."placeCode",
+                   D."planDeliveryDate",
+                   D."planPaymentDate",
+                   D.price,
+                   D.quantity,
+                   D."tradeSessionGUId",
+                   T."id",
+                   D.volume
             FROM JSONB_TO_RECORDSET(data :: JSONB) AS D (
                                                          guid UUID,
                                                          "accountGUId" UUID,
@@ -31,6 +48,7 @@ begin
                                                          "typeCode" VARCHAR(255),
                                                          volume NUMERIC(19, 2)
                 )
+                     LEFT JOIN "exchangeDealsTypes" T ON T.code = D."typeCode"
             ON CONFLICT (guid) DO UPDATE
                 SET "accountGUId" = EXCLUDED."accountGUId",
                     "couponCurrencyGUId" = EXCLUDED."couponCurrencyGUId",
@@ -46,7 +64,7 @@ begin
                     price = EXCLUDED.price,
                     quantity = EXCLUDED.quantity,
                     "tradeSessionGUId" = EXCLUDED."tradeSessionGUId",
-                    "typeCode" = EXCLUDED."typeCode",
+                    "typeId" = EXCLUDED."typeId",
                     volume = EXCLUDED.volume
             RETURNING id, guid
     )

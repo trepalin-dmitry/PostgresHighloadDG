@@ -11,8 +11,24 @@ begin
                                              "dealDateTime",
                                              "directionCode", "instrumentGUId", "orderGUId", "placeCode",
                                              "planDeliveryDate",
-                                             "planPaymentDate", price, quantity, "tradeSessionGUId", "typeCode", volume)
-            SELECT D.*
+                                             "planPaymentDate", price, quantity, "tradeSessionGUId", "typeId", volume)
+            SELECT D.guid,
+                   D."accountGUId",
+                   D."couponCurrencyGUId",
+                   D."couponVolume",
+                   D."currencyGUId",
+                   D."dealDateTime",
+                   D."directionCode",
+                   D."instrumentGUId",
+                   D."orderGUId",
+                   D."placeCode",
+                   D."planDeliveryDate",
+                   D."planPaymentDate",
+                   D.price,
+                   D.quantity,
+                   D."tradeSessionGUId",
+                   D."typeId",
+                   D.volume
             FROM JSONB_TO_RECORDSET(data :: JSONB) AS D (
                                                          guid UUID,
                                                          "accountGUId" UUID,
@@ -29,7 +45,7 @@ begin
                                                          price NUMERIC(19, 2),
                                                          quantity NUMERIC(19, 2),
                                                          "tradeSessionGUId" UUID,
-                                                         "typeCode" VARCHAR(255),
+                                                         "typeId" INTEGER,
                                                          volume NUMERIC(19, 2)
                 )
             ON CONFLICT (guid) DO UPDATE
@@ -47,7 +63,7 @@ begin
                     price = EXCLUDED.price,
                     quantity = EXCLUDED.quantity,
                     "tradeSessionGUId" = EXCLUDED."tradeSessionGUId",
-                    "typeCode" = EXCLUDED."typeCode",
+                    "typeId" = EXCLUDED."typeId",
                     volume = EXCLUDED.volume
             RETURNING id, guid
     )
