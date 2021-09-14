@@ -1,0 +1,4 @@
+create sequence simple_exchange_deals_sequence_one_id_seq;
+
+alter sequence simple_exchange_deals_sequence_one_id_seq owner to postgres;
+
